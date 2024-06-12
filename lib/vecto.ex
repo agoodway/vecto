@@ -1,29 +1,14 @@
 defmodule Vecto do
   @moduledoc """
   Hybrid Search with Postgres and Ecto
-
-  Loosely based on:
-  - https://github.com/pgvector/pgvector-python/blob/master/examples/hybrid_search_rrf.py
-  - https://github.com/Azure-Samples/rag-postgres-openai-python/blob/e30ea96ca11ca6578ca38d3428594bd98d704900/src/fastapi_app/postgres_searcher.py#L2
-  - https://supabase.com/docs/guides/ai/hybrid-search
-  - https://github.com/toranb/rag-n-drop/blob/main/lib/demo/section.ex#L30
-
-  Setup:
-  1. Create a tsvector column in your table (postgres "generated" column recommended based on one or combo of text columns)
-  2. Create a GIN index on the tsvector column
-  3. Create a HNSW index on the vector column
-  4. Generate embeddings for your documents and store them in the vector column (e.g. using BERT via Bumblebee or OpenAI's API)
-  4. Generate embeddings for your search query and pass to query_embedding
-
-  TODO: Implement additional vector distance functions (e.g. cosine similarity, euclidean distance) and tsquery options
   """
   import Ecto.Query
   import Pgvector.Ecto.Query
 
   @doc """
-    Keyword Search
+  Keyword Search
 
-    Uses Postgres full-text search (tsvector) to find documents that match the query string keywords, ranked by relevance.
+  Uses Postgres full-text search (tsvector) to find documents that match the query string, ranked by relevance.
   """
   def keyword_search(schema, query_field, query_string, limit_by \\ 100, select_columns \\ [])
       when is_atom(query_field) and is_binary(query_string) do
@@ -43,9 +28,9 @@ defmodule Vecto do
   end
 
   @doc """
-    Semantic Search
+  Semantic Search
 
-    Uses Postgres vector search (pg_vector) to find documents that are semantically similar to the query embedding, ranked by similarity.
+  Uses Postgres vector search (pg_vector) to find documents that are semantically similar to the query embedding, ranked by similarity.
   """
   def semantic_search(schema, query_field, query_embedding, limit_by \\ 100, select_columns \\ [])
       when is_atom(query_field) and is_list(query_embedding) do
@@ -71,9 +56,10 @@ defmodule Vecto do
     Uses Reciprocal Rank Fusion (RRF) approach to combine full-text search and vector search.
 
     Assumes your primary key is "id", vector column is "embedding" and tsvector column is "content",
-    but is flexible enough to work with any table / column name
+    but is flexible enough to work with any table or column name
   """
-  def hybrid_search(schema, query_embedding, query_string, opts \\ []) do
+  def hybrid_search(schema, query_embedding, query_string, opts \\ [])
+      when is_list(query_embedding) and is_binary(query_string) do
     opts = Keyword.merge(hybrid_search_default_opts(), opts)
     max_limit = opts[:limit] * 2
     select_columns = build_select_columns(schema, opts[:select_columns])
