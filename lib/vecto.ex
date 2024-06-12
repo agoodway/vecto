@@ -1,6 +1,6 @@
 defmodule Vecto do
   @moduledoc """
-  Full-Text Search, Vector Search and Hybrid Search with Postgres and Ecto
+  Hybrid Search with Postgres and Ecto
 
   Loosely based on:
   - https://github.com/pgvector/pgvector-python/blob/master/examples/hybrid_search_rrf.py

@@ -1,6 +1,6 @@
 # Vecto
 
-Full-Text Search, Vector Search and Hybrid Search with Postgres and Ecto
+Hybrid Search with Postgres and Ecto
 
 Loosely based on:
 - https://github.com/pgvector/pgvector-python/blob/master/examples/hybrid_search_rrf.py
@@ -25,11 +25,23 @@ end
 
 1. Create a tsvector column in your table (postgres "generated" column recommended based on one or combo of text columns)
 2. Create a GIN index on the tsvector column
-3. Create a HNSW index on the vector column
-4. Generate embeddings for your documents and store them in the vector column (e.g. using BERT via Bumblebee or OpenAI's API)
+3. Create a HNSW Cosine distance [index](https://github.com/pgvector/pgvector?tab=readme-ov-file#hnsw) on the vector column
+4. Generate embeddings for your documents and store them in the vector column (e.g. using BERT via [Bumblebee](https://github.com/elixir-nx/bumblebee), OpenAI's API, etc)
 4. Generate embeddings for your search query and pass to query_embedding
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/vecto>.
+### Usage
+
+```
+Blog
+|> Vecto.hybrid_search([0.11, 0.03, -0.02, ...], "what is a cat")
+|> Repo.all()
+```
+
+### TODO
+
+- Tests!
+- Implement additional vector search functions (e.g. cosine similarity, euclidean distance)
+- Allow for different tsquery options.
+
+Docs can be found at <https://hexdocs.pm/vecto>
 
