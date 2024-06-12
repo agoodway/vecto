@@ -28,7 +28,6 @@ defmodule Vecto.MixProject do
   defp deps do
     [
       {:ecto_sql, "~> 3.10"},
-      {:ecto_psql_extras, "~> 0.8"},
       {:postgrex, ">= 0.0.0"},
       {:pgvector, "~> 0.2.1"},
 

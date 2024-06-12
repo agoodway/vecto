@@ -37,6 +37,8 @@ Blog
 |> Repo.all()
 ```
 
+You can also use the keyword_search and semantic_search functions as stand-alone queries
+
 ### TODO
 
 - Tests!
