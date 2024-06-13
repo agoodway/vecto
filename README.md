@@ -17,22 +17,51 @@ by adding `vecto` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:vecto, "~> 0.1.1"}
+    {:vecto, "~> 0.1.2"}
   ]
 end
 ```
 
 ## Setup
 
-1. Create a tsvector column in your table (postgres "generated" column recommended based on one or combo of text columns)
-2. Create a GIN index on the tsvector column
-3. Create a HNSW Cosine distance [index](https://github.com/pgvector/pgvector?tab=readme-ov-file#hnsw) on the vector column
-4. Generate embeddings for your documents and store them in the vector column (e.g. using BERT via [Bumblebee](https://github.com/elixir-nx/bumblebee), OpenAI's API, etc)
-5. Generate embeddings for your search query and pass to query_embedding
+1. Install [pgvector](https://github.com/pgvector/pgvector?tab=readme-ov-file#installation)
+2. Create a tsvector column in your table (postgres "generated" column recommended based on one or combo of text columns)
+3. Create a GIN index on the tsvector column
+4. Create a HNSW Cosine distance [index](https://github.com/pgvector/pgvector?tab=readme-ov-file#hnsw) on the vector column
+5. Generate embeddings for your documents and store them in the vector column (e.g. using BERT via [Bumblebee](https://github.com/elixir-nx/bumblebee), OpenAI's API, etc)
+6. Generate embeddings for your search query and pass to query_embedding
+
+In your migrations (assuming you're using Ecto migrations):
+
+```elixir
+  # set up pgvector
+  execute "CREATE EXTENSION IF NOT EXISTS vector"
+
+  # on your table
+
+  ## vector column
+  add :embedding, :vector, size: 384 # depends on your embedding model
+
+  ## generated full text column, could be combination of several text columns
+  execute("""
+    ALTER TABLE post
+    ADD COLUMN content tsvector GENERATED ALWAYS AS (to_tsvector('english', content)) STORED
+  """)
+
+  execute """
+    CREATE INDEX content_tsvector_idx ON post USING GIN (content)
+  """
+
+  execute """
+    CREATE INDEX embedding_index ON post USING hnsw (embedding vector_cosine_ops);
+  """
+```
 
 ### Indexes
 
-HNSW index has limitation of 2 000 dimensions so in case you use OpenAI's API embeddings you need to reduce the dimensionality of the embeddings. You can do it in API call, for example:
+#### HNSW
+
+HNSW index has limitation of 2000 dimensions so in case you use OpenAI's API embeddings you need to reduce the dimensionality of the embeddings. You can do it in API call, for example:
 
 ```elixir
 OpenAI.embeddings(model: "text-embedding-3-large", input: text, dimensions: 2_000)
@@ -40,15 +69,25 @@ OpenAI.embeddings(model: "text-embedding-3-large", input: text, dimensions: 2_00
 
 Another important information is that HNSW index limit results with `hnsw.ef_search` parameter. Default value can be low for some cases, so you can increase it in the query:
 
-```sql
--- for current transaction (not persistent)
-SET hnsw.ef_search = 100;
--- for session (not persistent)
-SET LOCAL hnsw.ef_search = 100;
--- alter server configuration (you have to have permissions)
-ALTER SYSTEM SET hnsw.ef_search = 100;
--- for database (persistent)
-ALTER DATABASE your_database_name SET hnsw.ef_search = 100;
+In your migrations:
+
+```elixir
+# for current transaction (not persistent)
+execute """
+  SET hnsw.ef_search = 100;
+"""
+# for session (not persistent)
+execute """
+  SET LOCAL hnsw.ef_search = 100;
+"""
+# alter server configuration (you have to have permissions)
+execute """
+  ALTER SYSTEM SET hnsw.ef_search = 100;
+"""
+# for database (persistent)
+execute """
+  ALTER DATABASE your_database_name SET hnsw.ef_search = 100;
+"""
 ```
 
 ## Usage

@@ -58,6 +58,15 @@ defmodule Vecto do
 
     Assumes your primary key is "id", vector column is "embedding" and tsvector column is "content",
     but is flexible enough to work with any table or column name
+
+    Options:
+    - rrf_k: The number of top results to consider for RRF (default: 50)
+    - vector_column: The column name of the vector field (default: :embedding)
+    - vector_weight: The weight of the vector search (default: 1.0)
+    - tsvector_column: The column name of the tsvector field (default: :content)
+    - tsvector_weight: The weight of the tsvector search (default: 1.0)
+    - select_columns: The columns to select from the schema (default: all columns)
+    - limit: The number of results to return (default: 100)
   """
   def hybrid_search(schema, query_embedding, query_string, opts \\ [])
       when (is_list(query_embedding) or is_struct(query_embedding, Pgvector)) and
