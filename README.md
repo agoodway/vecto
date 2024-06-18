@@ -6,6 +6,7 @@ Loosely based on:
 
 - https://github.com/pgvector/pgvector-python/blob/master/examples/hybrid_search_rrf.py
 - https://github.com/Azure-Samples/rag-postgres-openai-python/blob/e30ea96ca11ca6578ca38d3428594bd98d704900/src/fastapi_app/postgres_searcher.py#L2
+- https://www.assembled.com/blog/better-rag-results-with-reciprocal-rank-fusion-and-hybrid-search
 - https://supabase.com/docs/guides/ai/hybrid-search
 - https://github.com/toranb/rag-n-drop/blob/main/lib/demo/section.ex#L30
 
@@ -94,11 +95,8 @@ execute """
 
 ```elixir
 Blog
-|> Vecto.hybrid_search([0.11, 0.03, -0.02, ...], "what is a cat")
-|> Repo.all()
-# or with Pgvector struct
-Blog
 |> Vecto.hybrid_search(Pgvector.new([0.11, 0.03, -0.02, ...]), "what is a cat")
+|> where([b], b.user_id == ^23)
 |> Repo.all()
 ```
 
@@ -106,8 +104,8 @@ You can also use the keyword_search and semantic_search functions as stand-alone
 
 ### TODO
 
-- Tests!
-- Implement additional vector search functions (e.g. cosine similarity, euclidean distance)
+- Tests...
+- Implement additional [vector operators](https://github.com/pgvector/pgvector?tab=readme-ov-file#vector-operators) (e.g. euclidean distance, negative inner product, etc)
 - Allow for different tsquery options.
 
 Docs can be found at <https://hexdocs.pm/vecto>
