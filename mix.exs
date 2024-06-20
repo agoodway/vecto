@@ -41,7 +41,7 @@ defmodule Vecto.MixProject do
   end
 
   defp description() do
-    "Listen to change events on your Postgres tables then perform callback-like actions with the data."
+    "Hybrid Search with Postgres and Ecto."
   end
 
   defp package() do
