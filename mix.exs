@@ -29,7 +29,7 @@ defmodule Vecto.MixProject do
     [
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
-      {:pgvector, "~> 0.2.1"},
+      {:pgvector, ">= 0.2.1"},
 
       # Dev & Test
       {:ex_doc, "~> 0.31.1", only: :dev, runtime: false},
